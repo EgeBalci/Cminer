@@ -31,16 +31,16 @@ using namespace std;
 
 struct Section {
 	string Name;
-	unsigned int StartAddr; 
-	unsigned int EndAddr;
-	unsigned int size;
+	int StartAddr; 
+	int EndAddr;
+	int size;
 	Section * Next;
 };
 
 
 struct Cave {
-	unsigned int StartAddr = 0;
-	unsigned int EndAddr = 0;
+	int StartAddr = 0;
+	int EndAddr = 0;
 	int CaveSize = 0;
 	string Section = "";
 	Cave * Next = NULL;

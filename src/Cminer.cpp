@@ -1,6 +1,6 @@
 #include <iostream>
-#include <fstream>
-#include <string>
+//#include <fstream>
+//#include <string>
 #include "Miner.h"
 
 using namespace std;
@@ -9,14 +9,15 @@ void PrintHelp(int);
 
 int main(int argc, char const *argv[])
 {
-	
+	cout << argc;
 	if(argc == 1){
-		PrintHelp(1);	
+		PrintHelp(1);
+		return 0;	
 	}
 	else {
 		PrintHelp(0);
 	}
-	cout << "1";
+	cout << GREEN << "1";
 	Miner tom;
 	cout << "2";
 	tom.GetFileData(argv[1]);
@@ -46,7 +47,7 @@ void PrintHelp(int mode){
 					 "                 | \\  __ /    \n"
 					 "                /|  '.__/     \n"
 					 "             .'` \\     |_     \n"
-					 "                   '-__ / `-    \n";
+					 "                   '-__ / `-    \n" << RESET;
 
 
 	cout << BOLDRED << "   _____           _           \n"
@@ -54,13 +55,13 @@ void PrintHelp(int mode){
 					   " | |     _ __ ___  _ _ __   ___ _ __ \n"
 					   " | |    | '_ ` _ \\| | '_ \\ / _ \\ '__|\n"
 					   " | |____| | | | | | | | | |  __/ |   \n"
-					   "  \\_____|_| |_| |_|_|_| |_|\\___|_|   \n\n";
+					   "  \\_____|_| |_| |_|_|_| |_|\\___|_|   \n\n" << RESET;
 
-	cout << BOLDBLUE << "Github: github.com/EgeBalci/Cminer\n";
+	cout << BOLDBLUE << "Github: github.com/EgeBalci/Cminer\n" << RESET;
 	if(mode == 1) {
-		cout << BOLDGREEN << "\nUsage: Cminer <file>\n\n";
-		cout << RESET << GREEN << "Cminer is a tool for enumerating code caves inside PE files.\n"
-	  				 		  	  "(All code caves under the size of 100 bytes will be ignored)\n";
+		cout << BOLDGREEN << "\nUsage: Cminer <file>\n\n" << RESET;
+		cout << GREEN << "Cminer is a tool for enumerating code caves inside PE files.\n"
+	  				 	 "(All code caves under the size of 100 bytes will be ignored)\n" << RESET;
 	}
 
 
