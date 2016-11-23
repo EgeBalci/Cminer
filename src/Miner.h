@@ -48,7 +48,6 @@ struct Cave {
 
 
 struct PE {
-	string MagicNumber;
 	string ImageBase;
 	string StartAddr;
 	int SectionNum = 0;
@@ -64,18 +63,31 @@ private:
 	Cave * cave = NULL;
 	PE pe;
 public:
-	void GetFileData(const char*); // Gathers PE file data via "objdump -x" & "grep" command
-	void ParseFileSections(const char*); // Parse the start & end addresses of PE image sections
-	void ValidateFile();  // This function checks the validity of PE file
-	fstream * LoadPE(const char*); // Load the given named file
+	void GetFileData(string FileName); // Gathers PE file data via "objdump -x" & "grep" command
+	void ParseFileSections(string); // Parse the start & end addresses of PE image sections
+	fstream * LoadPE(string); // Load the given named file
 	void StartMiner(fstream*); // Start tracing the file byte stream for NULL bytes
-	void EnumCaveLoc(Cave*); // Find out cave belongs witch section 
+	void EnumCaveLoc(Cave*); // Find out cave belongs witch section
+	void Result();
 };
 
 
 
+void Miner::Result(){
+	cout << endl << BOLDYELLOW << "[+] " << BOLDGREEN << CaveCount << BOLDYELLOW << " Caves found.\n";
+	int i = 0;
+	while(cave != NULL){
+		cout << BOLDYELLOW << "\n[#] Cave " << i << endl;
+		cout << BOLDYELLOW << "[*] Section: " << BOLDBLUE << cave->Section << endl;
+		cout << BOLDYELLOW << "[*] Start Address: " << BOLDBLUE << cave->StartAddr << endl;
+		cout << BOLDYELLOW << "[*] End Address: " << BOLDBLUE << cave->EndAddr << endl;
+		
+		cave = cave->Next; 
+	}
 
 
+	
+}
 
 
 void Miner::StartMiner(fstream * File){
@@ -84,7 +96,7 @@ void Miner::StartMiner(fstream * File){
 
 	char Cursor;
 	cout << RESET << BOLDYELLOW << "[*] Starting miner...\n";
-	while(File->eof()){
+	while(!File->eof()){
 		File->read(&Cursor,1);
 		CurrentOfset++;
 		if(Cursor == 0x00){
@@ -94,6 +106,7 @@ void Miner::StartMiner(fstream * File){
 			if(NullCount > 100){
 				Cave * NewCave = new Cave;
 				CaveCount++;
+				cout << RESET << BOLDGREEN << "[+] New cave detected !\n";
 				NewCave->CaveSize = NullCount;
 				NewCave->StartAddr = (CurrentOfset-NullCount);
 				NewCave->EndAddr = CurrentOfset;
@@ -109,22 +122,31 @@ void Miner::StartMiner(fstream * File){
 			NullCount = 0;
 		}
 	}
-	cout << RESET << BOLDYELLOW << "[*] Mining finished.";
+	cout << RESET << BOLDYELLOW << "[*] Mining finished.\n";
 }
 
 
 
 
-fstream * Miner::LoadPE(const char * FileName){
+fstream * Miner::LoadPE(string FileName){
 	fstream File;
-	cout << RESET << BOLDYELLOW << "[*] Loading PE file...";
-	File.open (FileName, ios::out | ios::binary);
+	cout << RESET << BOLDYELLOW << "[*] Loading PE file...\n";
+	File.open (&FileName[0], ios::out | ios::binary);
 	if(!File.is_open()){
-		cout << RESET << BOLDRED << "ERROR : " << RED << "Cannot open file !" << endl;
+		cout << RESET << BOLDRED << "[-] ERROR : " << RED << "Cannot open file !" << endl;
 		exit(1);		
 	}
 
-	return &File;
+	system("touch file.bak");
+	fstream _File;
+	_File.open("file.bak");
+	if(_File.is_open()){
+		_File << File;
+	}
+	File << File;
+	File.close();
+
+	return &_File;
 }
 
 void Miner::EnumCaveLoc(Cave * _Cave){
@@ -138,91 +160,84 @@ void Miner::EnumCaveLoc(Cave * _Cave){
 }
 
 
-void Miner::ValidateFile(){
-	if(pe.MagicNumber.find("(PE32)") == string::npos) {
-		cout << RESET << BOLDRED << "ERROR : " << RED << "Given file is not a valid PE !" << endl;
-		exit(1);		
-	}
-}
 
-void Miner::GetFileData(const char * FileName){
+void Miner::GetFileData(string FileName){
 
-	cout << RESET << BOLDYELLOW << "[*] Extracting file header data..."	;
-	char * MagicNum = "objdump -x ";
-	strcat(MagicNum,FileName);
-	strcat(MagicNum," | grep 'Magic'");
+	cout << RESET << BOLDYELLOW << "[*] Extracting file header data...\n"	;
+	string MagicNum = "objdump -x ";
+	MagicNum += FileName;
+	MagicNum += " | grep 'Magic'";
 
-	char * ImageBase = "objdump -x ";
-	strcat(ImageBase,FileName);
-	strcat(ImageBase," | grep 'ImageBase'");
+	string ImageBase = "objdump -x ";
+	ImageBase += FileName;
+	ImageBase += " | grep 'ImageBase' >> file.dat";
 
-	char * StartAddr = "objdump -x ";
-	strcat(StartAddr,FileName);
-	strcat(StartAddr," | grep 'StartAddr'");
+	string StartAddr = "objdump -x ";
+	StartAddr += FileName;
+	StartAddr += " | grep 'start address' >> file.dat";
 
 
 
 
-	char * Ls = "ls ";
-	strcat(Ls, FileName);
+	string Ls = "ls ";
+	Ls += FileName;
 
-	char Data[1000];
-	FILE * Check = popen(Ls, "r");
-	if(Check == NULL){
-		cout << RESET << BOLDRED << "ERROR : " << RED << "File enumeration failed !" << endl;
+	int FileFound = system(&Ls[0]);
+	if(FileFound != 0) {
+		cout << RESET << BOLDRED << "[-] ERROR : " << RED << "No such file !" << endl;
 		exit(1);
 	}
-	if(fgets(Data,(sizeof(Data)-1),Check) != NULL) {
-		for(int i = 0; i < sizeof(FileName); i++){
-			if(FileName[i] != Data[i]) {
-				cout << RESET << BOLDRED << "ERROR : " << RED << "No such file !" << endl;
-			}
+
+	int IsPE = system(&MagicNum[0]);
+	if(IsPE != 0){
+		cout << RESET << BOLDRED << "[-] ERROR : " << RED << "File is not a valid PE32 !" << endl;
+		exit(1);
+	}
+
+	int ImageBaseFound = system(&ImageBase[0]);
+	if(ImageBaseFound != 0){
+		cout << RESET << BOLDRED << "[-] ERROR : " << RED << "Unable to find image base !" << endl;
+		exit(1);
+	}
+
+	int StartAddrFound = system(&StartAddr[0]);
+	if(StartAddrFound != 0){
+		cout << RESET << BOLDRED << "[-] ERROR : " << RED << "Unable to find start address !" << endl;
+		exit(1);
+	}	
+
+	fstream DataFile;
+	string Line;
+
+	DataFile.open("file.dat");
+	if(DataFile.is_open()) {
+		getline(DataFile, Line);
+		for(int i = 11; i < 25; i++){
+			pe.ImageBase += Line[i]; 
 		}
-	}
-	delete Data;
+		
+		cout << BOLDYELLOW << "[*] Image Base: " << BOLDBLUE << pe.ImageBase << endl;
+		
+		getline(DataFile, Line);
+		for(int i = 14; i < 25; i++){
+			pe.StartAddr += Line[i]; 
+		}
 
-
-	FILE * GetMagicNum = popen(MagicNum, "r");
-	if(GetMagicNum == NULL){
-		cout << RESET << BOLDRED << "ERROR : " << RED << "File enumeration failed !" << endl;
-		exit(1);
+		cout << BOLDYELLOW << "[*] Start Address: " << BOLDBLUE << pe.StartAddr << endl;
 	}
-	if(fgets(Data,(sizeof(Data)-1),GetMagicNum) != NULL) {
-		pe.MagicNumber = Data;
-	}
-	delete Data;
-
-	FILE * GetImageBase = popen(ImageBase, "r");
-	if(GetImageBase == NULL){
-		cout << RESET << BOLDRED << "ERROR : " << RED << "File enumeration failed !" << endl;
-		exit(1);
-	}
-	if(fgets(Data,(sizeof(Data)-1),GetImageBase) != NULL) {
-		pe.ImageBase = Data;
-	}
-	delete Data;
-
-	FILE * GetStartAddr = popen(StartAddr, "r");
-	if(GetStartAddr == NULL){
-		cout << RESET << BOLDRED << "ERROR : " << RED << "File enumeration failed !" << endl;
-		exit(1);
-	}
-	if(fgets(Data,(sizeof(Data)-1),GetStartAddr) != NULL) {
-		pe.StartAddr = Data;
-	}
-	delete Data;
+	system("rm file.dat");
 
 
 }
 
-void Miner::ParseFileSections(const char * FileName){
+void Miner::ParseFileSections(string FileName){
 
-	cout << RESET << BOLDYELLOW << "[*] Parsing file sections...";
-	char * _Sections = "objdump -h ";
-	strcat(_Sections,FileName);
-	strcat(_Sections," | grep '2**2' > sec.dat");
+	cout << RESET << BOLDYELLOW << "[*] Parsing file sections...\n";
+	string _Sections = "objdump -h ";
+	_Sections += FileName;
+	_Sections += " | grep '2**2' > sec.dat";
 
-	system(_Sections); // objdump -h | grep '2**2' > sec.dat
+	system(&_Sections[0]); // objdump -h | grep '2**2' > sec.dat
 
 	fstream SectionData;
 	string Line;
@@ -260,8 +275,8 @@ void Miner::ParseFileSections(const char * FileName){
 			pe.SectionNum++; 
 		}
 	}
-	cout << RESET << BOLDYELLOW << "[*] Section parsing complete.";
+	cout << RESET << BOLDYELLOW << "[*] Section parsing complete.\n";
 
-
+	system("rm sec.dat");
 
 }

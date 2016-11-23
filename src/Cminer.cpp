@@ -9,7 +9,6 @@ void PrintHelp(int);
 
 int main(int argc, char const *argv[])
 {
-	cout << argc;
 	if(argc == 1){
 		PrintHelp(1);
 		return 0;	
@@ -17,18 +16,22 @@ int main(int argc, char const *argv[])
 	else {
 		PrintHelp(0);
 	}
-	cout << GREEN << "1";
-	Miner tom;
-	cout << "2";
+
+	Miner tom; // Our humble miner tom ;)
+
 	tom.GetFileData(argv[1]);
-	cout << "3";
+	tom.ParseFileSections(argv[1]);
+	fstream * File = tom.LoadPE(argv[1]);
+	tom.StartMiner(File);
+	tom.Result();
+
 
 	
 
 
 
 
-
+	system("rm file.bak");
 	return 0;
 }
 
