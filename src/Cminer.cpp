@@ -21,8 +21,7 @@ int main(int argc, char const *argv[])
 
 	tom.GetFileData(argv[1]);
 	tom.ParseFileSections(argv[1]);
-	fstream * File = tom.LoadPE(argv[1]);
-	tom.StartMiner(File);
+	tom.StartMiner(tom.LoadPE(argv[1]));
 	tom.Result();
 
 

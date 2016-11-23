@@ -34,7 +34,7 @@ struct Section {
 	int StartAddr; 
 	int EndAddr;
 	int size;
-	Section * Next;
+	Section * Next = NULL;
 };
 
 
@@ -94,12 +94,17 @@ void Miner::StartMiner(fstream * File){
 	int CurrentOfset = 0;
 	int NullCount = 0;
 
-	char Cursor;
+	File->seekg(0, File->end);
+	int FileSize = File->tellg();
+	File->seekg(0, File->beg);
+
+	char * Cursor = new char[FileSize];
+	File->read(Cursor,FileSize);
 	cout << RESET << BOLDYELLOW << "[*] Starting miner...\n";
-	while(!File->eof()){
-		File->read(&Cursor,1);
+	for(int i = 0; i < FileSize; i++){
+		
 		CurrentOfset++;
-		if(Cursor == 0x00){
+		if(Cursor[i] == 0x00){
 			NullCount++;
 		}
 		else{
@@ -131,22 +136,16 @@ void Miner::StartMiner(fstream * File){
 fstream * Miner::LoadPE(string FileName){
 	fstream File;
 	cout << RESET << BOLDYELLOW << "[*] Loading PE file...\n";
-	File.open (&FileName[0], ios::out | ios::binary);
-	if(!File.is_open()){
+	File.open (&FileName[0], ios::out | ios::in | ios::binary);
+	if(!(File.is_open())){
 		cout << RESET << BOLDRED << "[-] ERROR : " << RED << "Cannot open file !" << endl;
 		exit(1);		
 	}
 
-	system("touch file.bak");
-	fstream _File;
-	_File.open("file.bak");
-	if(_File.is_open()){
-		_File << File;
-	}
-	File << File;
-	File.close();
+	string Backup = "cp " + FileName + " " + FileName + ".bak";
+	system(&Backup[0]);
 
-	return &_File;
+	return &File;
 }
 
 void Miner::EnumCaveLoc(Cave * _Cave){
@@ -274,6 +273,11 @@ void Miner::ParseFileSections(string FileName){
 			NewSection->EndAddr = (NewSection->StartAddr + NewSection->size);			
 			pe.SectionNum++; 
 		}
+	}
+	Section * temp = pe.Sections;
+	while(temp != NULL){
+		cout << BOLDYELLOW << "[>] " << BOLDGREEN << temp->Name << endl;
+		temp = temp->Next;
 	}
 	cout << RESET << BOLDYELLOW << "[*] Section parsing complete.\n";
 
