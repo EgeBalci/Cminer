@@ -21,16 +21,14 @@ int main(int argc, char const *argv[])
 
 	tom.GetFileData(argv[1]);
 	tom.ParseFileSections(argv[1]);
-	tom.StartMiner(tom.LoadPE(argv[1]));
+	char * File = tom.LoadPE(argv[1]);
+	tom.StartMiner(File);
 	tom.Result();
 
-
-	
-
-
-
-
-	system("rm file.bak");
+	string Clean = "rm ";
+	Clean += argv[1];
+	Clean += ".bak";
+	system(&Clean[0]);
 	return 0;
 }
 
@@ -63,7 +61,7 @@ void PrintHelp(int mode){
 	if(mode == 1) {
 		cout << BOLDGREEN << "\nUsage: Cminer <file>\n\n" << RESET;
 		cout << GREEN << "Cminer is a tool for enumerating code caves inside PE files.\n"
-	  				 	 "(All code caves under the size of 100 bytes will be ignored)\n" << RESET;
+	  				 	 "(All code caves under the size of 300 bytes will be ignored)\n" << RESET;
 	}
 
 

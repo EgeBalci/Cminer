@@ -65,8 +65,8 @@ private:
 public:
 	void GetFileData(string FileName); // Gathers PE file data via "objdump -x" & "grep" command
 	void ParseFileSections(string); // Parse the start & end addresses of PE image sections
-	fstream * LoadPE(string); // Load the given named file
-	void StartMiner(fstream*); // Start tracing the file byte stream for NULL bytes
+	char * LoadPE(string); // Load the given named file
+	void StartMiner(char*); // Start tracing the file byte stream for NULL bytes
 	void EnumCaveLoc(Cave*); // Find out cave belongs witch section
 	void Result();
 };
@@ -75,46 +75,58 @@ public:
 
 void Miner::Result(){
 	cout << endl << BOLDYELLOW << "[+] " << BOLDGREEN << CaveCount << BOLDYELLOW << " Caves found.\n";
-	int i = 0;
-	while(cave != NULL){
-		cout << BOLDYELLOW << "\n[#] Cave " << i << endl;
-		cout << BOLDYELLOW << "[*] Section: " << BOLDBLUE << cave->Section << endl;
-		cout << BOLDYELLOW << "[*] Start Address: " << BOLDBLUE << cave->StartAddr << endl;
-		cout << BOLDYELLOW << "[*] End Address: " << BOLDBLUE << cave->EndAddr << endl;
-		
-		cave = cave->Next; 
-	}
+	int i = 1;
+	Cave * temp = cave;
+	while(temp != NULL){
 
+		stringstream SS1;
+		stringstream SS2;
+
+		cout << BOLDYELLOW << "\n[#] Cave " << i << endl;
+		
+		cout << BOLDYELLOW << "[*] Section: " << BOLDBLUE << temp->Section << endl;		
+		cout << BOLDYELLOW << "[*] Cave Size: " << BOLDBLUE << temp->CaveSize << BOLDYELLOW << " byte." << endl;
+
+		cout << BOLDYELLOW << "[*] Start Address: ";
+		string HexStartAddr;
+		SS1 << hex << temp->StartAddr;
+		SS1 >> HexStartAddr;
+		cout << BOLDBLUE << "0x" << HexStartAddr << endl;
+
+		cout << BOLDYELLOW << "[*] End Address: ";
+		string HexEndAddr;
+		SS2 << hex << temp->EndAddr;
+		SS2 >> HexEndAddr;
+		cout << BOLDBLUE << "0x" << HexEndAddr << endl;
+		i++;
+		temp = temp->Next; 
+	}
+ 
 
 	
 }
 
 
-void Miner::StartMiner(fstream * File){
+void Miner::StartMiner(char * Cursor){
 	int CurrentOfset = 0;
 	int NullCount = 0;
 
-	File->seekg(0, File->end);
-	int FileSize = File->tellg();
-	File->seekg(0, File->beg);
+	cout << RESET << BOLDYELLOW << "[*] Starting cave mining process...\n";
 
-	char * Cursor = new char[FileSize];
-	File->read(Cursor,FileSize);
-	cout << RESET << BOLDYELLOW << "[*] Starting miner...\n";
-	for(int i = 0; i < FileSize; i++){
+	for(int i = 0; i < pe.FileSize; i++){
+
 		
-		CurrentOfset++;
-		if(Cursor[i] == 0x00){
+		if(Cursor[i] == (char)0x00){ // Current ofset = i
 			NullCount++;
 		}
 		else{
-			if(NullCount > 100){
+			if(NullCount > 300){
 				Cave * NewCave = new Cave;
 				CaveCount++;
 				cout << RESET << BOLDGREEN << "[+] New cave detected !\n";
 				NewCave->CaveSize = NullCount;
-				NewCave->StartAddr = (CurrentOfset-NullCount);
-				NewCave->EndAddr = CurrentOfset;
+				NewCave->StartAddr = (i-NullCount);
+				NewCave->EndAddr = i;
 				EnumCaveLoc(NewCave);
 				if(cave == NULL){
 					cave = NewCave;
@@ -133,7 +145,7 @@ void Miner::StartMiner(fstream * File){
 
 
 
-fstream * Miner::LoadPE(string FileName){
+char * Miner::LoadPE(string FileName){
 	fstream File;
 	cout << RESET << BOLDYELLOW << "[*] Loading PE file...\n";
 	File.open (&FileName[0], ios::out | ios::in | ios::binary);
@@ -145,16 +157,37 @@ fstream * Miner::LoadPE(string FileName){
 	string Backup = "cp " + FileName + " " + FileName + ".bak";
 	system(&Backup[0]);
 
-	return &File;
+	File.seekg(0, File.end);
+	int FileSize = File.tellg();
+	File.seekg(0, File.beg);
+
+
+	
+	char * Cursor = new char[FileSize];
+
+	for(int i = 0; i < FileSize; i++){
+		File.get(Cursor[i]);
+	}
+	pe.FileSize = FileSize;
+	
+
+	cout << RESET << BOLDYELLOW << "[*] File Size: " << BOLDBLUE << FileSize << "\n";
+
+	return Cursor;
 }
 
 void Miner::EnumCaveLoc(Cave * _Cave){
 	Section * Sec = pe.Sections;
 	for(int i = 0; i < pe.SectionNum; i++) {
-		if(Sec->StartAddr > _Cave->StartAddr < Sec->EndAddr) {
+		if((Sec->StartAddr < _Cave->StartAddr) && (_Cave->StartAddr < Sec->EndAddr)) {
 			_Cave->Section = Sec->Name;
+			break;
 		}
+		
 		Sec = Sec->Next;
+	}
+	if(_Cave->Section == ""){
+		_Cave->Section = "No Section.";
 	}
 }
 
@@ -249,7 +282,7 @@ void Miner::ParseFileSections(string FileName){
 			string Start = "";
 			for(int i = 4; i < 11; i++){
 				SecName += Line[i]; 
-			}
+			}	
 			Section * NewSection = new Section;
 			NewSection->Name = SecName;
 			if(pe.Sections == NULL){
@@ -259,24 +292,37 @@ void Miner::ParseFileSections(string FileName){
 				NewSection->Next = pe.Sections;
 				pe.Sections = NewSection;
 			}
-			for(int i = 18; i < 27; i++){
+			for(int i = 18; i < 26; i++){
 				SecSize += Line[i];
 			}
-			stringstream SS;
-			SS << hex << SecSize;
-			SS >> NewSection->size;
+			stringstream SS1;
+			SS1 << hex << SecSize;
+			SS1 >> NewSection->size;
 			for(int i = 48; i < 56; i++){
-				SecSize += Line[i];
+				Start += Line[i];
 			}
-			SS << hex << Start;
-			SS >> NewSection->StartAddr;
+
+			stringstream SS2;
+			SS2 << hex << Start;
+			SS2 >> NewSection->StartAddr;
 			NewSection->EndAddr = (NewSection->StartAddr + NewSection->size);			
 			pe.SectionNum++; 
+			//cout << SecName << " hex size :" << SecSize <<  " raw: " << NewSection->size << " hex start:" << Start << " raw : " << NewSection->StartAddr << endl;
 		}
 	}
 	Section * temp = pe.Sections;
 	while(temp != NULL){
-		cout << BOLDYELLOW << "[>] " << BOLDGREEN << temp->Name << endl;
+		string Start;
+		string End;
+		stringstream SS1;
+		stringstream SS2;
+		cout << BOLDYELLOW << "[>] " << BOLDGREEN << temp->Name << BOLDBLUE << "(";
+		SS1 << hex << temp->StartAddr;
+		SS1 >> Start;
+		cout << "0x" << Start << "/";
+		SS2 << hex << temp->EndAddr;
+		SS2 >> End;
+		cout << "0x" << End << ")"  << endl;
 		temp = temp->Next;
 	}
 	cout << RESET << BOLDYELLOW << "[*] Section parsing complete.\n";
