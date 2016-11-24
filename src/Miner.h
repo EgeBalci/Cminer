@@ -29,46 +29,46 @@ using namespace std;
 
 //Usage : cout << RED << "hello world" << RESET << endl;
 
-struct Section {
-	string Name;
-	int StartAddr; 
-	int EndAddr;
-	int size;
-	Section * Next = NULL;
+struct Section { // Section data structure with linked list...
+	string Name; // Sections name
+	int StartAddr; // Start address of the section (file ofset)
+	int EndAddr;// End address of the section (file ofset)
+	int size; // Size of the section
+	Section * Next = NULL; // Next section data link
 };
 
 
-struct Cave {
-	int StartAddr = 0;
-	int EndAddr = 0;
-	int CaveSize = 0;
-	string Section = "";
-	Cave * Next = NULL;
+struct Cave { // Cave data structure with linked list...
+	int StartAddr = 0; // Start address of the code cave (file ofset)
+	int EndAddr = 0; // End address of the code cave (file ofset)
+	int CaveSize = 0; // Size of the code cave
+	string Section = ""; // The section whitch contains this code cave
+	Cave * Next = NULL; // Next code cave data link
 };
 
 
-struct PE {
-	string ImageBase;
-	string StartAddr;
-	int SectionNum = 0;
-	Section * Sections = NULL;
-	int FileSize;
+struct PE { // This is a PE structure for parsing and storing given file data
+	string ImageBase; // Base address of the PE image
+	string StartAddr; // Start address of the PE image
+	int SectionNum = 0; // Number of sections inside PE image
+	Section * Sections = NULL; // Pointer to first section structure
+	int FileSize; // Size of the PE image
 
 };
 
 
 class Miner{
 private:
-	int CaveCount = 0;
-	Cave * cave = NULL;
-	PE pe;
+	int CaveCount = 0; // Number of code caves discoverd
+	Cave * cave = NULL; // Pointer to the first code cave structure in linked list
+	PE pe; // Define a PE structure for storing data
 public:
 	void GetFileData(string FileName); // Gathers PE file data via "objdump -x" & "grep" command
 	void ParseFileSections(string); // Parse the start & end addresses of PE image sections
 	char * LoadPE(string); // Load the given named file
 	void StartMiner(char*); // Start tracing the file byte stream for NULL bytes
 	void EnumCaveLoc(Cave*); // Find out cave belongs witch section
-	void Result();
+	void Result(); // Prints the result...
 };
 
 

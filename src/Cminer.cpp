@@ -1,6 +1,4 @@
 #include <iostream>
-//#include <fstream>
-//#include <string>
 #include "Miner.h"
 
 using namespace std;
