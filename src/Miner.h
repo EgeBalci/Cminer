@@ -31,8 +31,9 @@ using namespace std;
 
 struct Section { // Section data structure with linked list...
 	string Name; // Sections name
-	int StartAddr; // Start address of the section (file ofset)
-	int EndAddr;// End address of the section (file ofset)
+	int FileOfset; // File ofset of the section
+	int StartAddr; // Start address of the section 
+	int EndAddr;// End address of the section 
 	int size; // Size of the section
 	Section * Next = NULL; // Next section data link
 };
@@ -82,7 +83,7 @@ void Miner::Result(){
 		stringstream SS1;
 		stringstream SS2;
 
-		cout << BOLDYELLOW << "\n[#] Cave " << i << endl;
+		cout << BOLDGREEN << "\n[#] Cave " << i << endl;
 		
 		cout << BOLDYELLOW << "[*] Section: " << BOLDBLUE << temp->Section << endl;		
 		cout << BOLDYELLOW << "[*] Cave Size: " << BOLDBLUE << temp->CaveSize << BOLDYELLOW << " byte." << endl;
@@ -179,8 +180,10 @@ char * Miner::LoadPE(string FileName){
 void Miner::EnumCaveLoc(Cave * _Cave){
 	Section * Sec = pe.Sections;
 	for(int i = 0; i < pe.SectionNum; i++) {
-		if((Sec->StartAddr < _Cave->StartAddr) && (_Cave->StartAddr < Sec->EndAddr)) {
+		if((Sec->FileOfset < _Cave->StartAddr) && (_Cave->StartAddr < (Sec->FileOfset + Sec->size))) {
 			_Cave->Section = Sec->Name;
+			_Cave->StartAddr = (Sec->StartAddr + (_Cave->StartAddr - Sec->FileOfset)); // Calculating the VMA(Virtual Memory Address) of the code cave
+			_Cave->EndAddr = (_Cave->StartAddr + _Cave->CaveSize);
 			break;
 		}
 		
@@ -280,6 +283,8 @@ void Miner::ParseFileSections(string FileName){
 			string SecName = "";
 			string SecSize = "";
 			string Start = "";
+			string Ofset = "";
+
 			for(int i = 4; i < 11; i++){
 				SecName += Line[i]; 
 			}	
@@ -292,20 +297,29 @@ void Miner::ParseFileSections(string FileName){
 				NewSection->Next = pe.Sections;
 				pe.Sections = NewSection;
 			}
+			
 			for(int i = 18; i < 26; i++){
 				SecSize += Line[i];
 			}
 			stringstream SS1;
 			SS1 << hex << SecSize;
 			SS1 >> NewSection->size;
-			for(int i = 48; i < 56; i++){
+
+			for(int i = 28; i < 36; i++){
 				Start += Line[i];
 			}
-
 			stringstream SS2;
 			SS2 << hex << Start;
 			SS2 >> NewSection->StartAddr;
-			NewSection->EndAddr = (NewSection->StartAddr + NewSection->size);			
+			NewSection->EndAddr = (NewSection->StartAddr + NewSection->size);
+
+			for(int i = 48; i < 56; i++){
+				Ofset += Line[i];
+			}
+			stringstream SS3;
+			SS3 << hex << Ofset;
+			SS3 >> NewSection->FileOfset;
+						
 			pe.SectionNum++; 
 			//cout << SecName << " hex size :" << SecSize <<  " raw: " << NewSection->size << " hex start:" << Start << " raw : " << NewSection->StartAddr << endl;
 		}
