@@ -43,6 +43,7 @@ struct Cave { // Cave data structure with linked list...
 	int StartAddr = 0; // Start address of the code cave (file ofset)
 	int EndAddr = 0; // End address of the code cave (file ofset)
 	int CaveSize = 0; // Size of the code cave
+	int FileOfset = 0; // File ofset of the cave
 	string Section = ""; // The section whitch contains this code cave
 	Cave * Next = NULL; // Next code cave data link
 };
@@ -82,6 +83,7 @@ void Miner::Result(){
 
 		stringstream SS1;
 		stringstream SS2;
+		stringstream SS3;
 
 		cout << BOLDGREEN << "\n[#] Cave " << i << endl;
 		
@@ -99,6 +101,12 @@ void Miner::Result(){
 		SS2 << hex << temp->EndAddr;
 		SS2 >> HexEndAddr;
 		cout << BOLDBLUE << "0x" << HexEndAddr << endl;
+
+		cout << BOLDYELLOW << "[*] File Ofset: ";
+		string FileOfset;
+		SS3 << hex << temp->FileOfset;
+		SS3 >> FileOfset;
+		cout << BOLDBLUE << "0x" << FileOfset << endl;
 		i++;
 		temp = temp->Next; 
 	}
@@ -182,6 +190,7 @@ void Miner::EnumCaveLoc(Cave * _Cave){
 	for(int i = 0; i < pe.SectionNum; i++) {
 		if((Sec->FileOfset < _Cave->StartAddr) && (_Cave->StartAddr < (Sec->FileOfset + Sec->size))) {
 			_Cave->Section = Sec->Name;
+			_Cave->FileOfset = _Cave->StartAddr;
 			_Cave->StartAddr = (Sec->StartAddr + (_Cave->StartAddr - Sec->FileOfset)); // Calculating the VMA(Virtual Memory Address) of the code cave
 			_Cave->EndAddr = (_Cave->StartAddr + _Cave->CaveSize);
 			break;
