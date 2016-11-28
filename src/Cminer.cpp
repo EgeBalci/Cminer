@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 #include "Miner.h"
 
 using namespace std;
@@ -15,12 +16,21 @@ int main(int argc, char const *argv[])
 		PrintHelp(0);
 	}
 
+	int MinCaveSize = 300;
+	string MinCaveSizeStr = string(argv[2],sizeof(argv[1]));
+	MinCaveSize = stoi(MinCaveSizeStr); // Convert the minimum cave size to integer
+	if(MinCaveSize < 0 || MinCaveSize < 100) {
+		cout << RESET << BOLDRED << "[-] ERROR : " << RED << "Minimum cave size is too small !" << endl;
+		return 0;
+	}
+	cout << RESET << BOLDYELLOW << "[*] Minimum cave size set to " << argv[1] << endl;
+
 	Miner tom; // Our humble miner tom ;)
 
 	tom.GetFileData(argv[1]);
 	tom.ParseFileSections(argv[1]);
 	char * File = tom.LoadPE(argv[1]);
-	tom.StartMiner(File);
+	tom.StartMiner(File,MinCaveSize);
 	tom.Result();
 
 	string Clean = "rm ";
@@ -57,9 +67,8 @@ void PrintHelp(int mode){
 
 	cout << BOLDBLUE << "Github: github.com/EgeBalci/Cminer\n" << RESET;
 	if(mode == 1) {
-		cout << BOLDGREEN << "\nUsage: Cminer <file>\n\n" << RESET;
-		cout << GREEN << "Cminer is a tool for enumerating code caves inside PE files.\n"
-	  				 	 "(All code caves under the size of 300 bytes will be ignored)\n" << RESET;
+		cout << BOLDGREEN << "\nUsage: \n\tCminer <file> <MinCaveSize>\n\n" << RESET;
+		cout << GREEN << "Cminer is a tool for enumerating code caves inside PE files.\n" << RESET;
 	}
 
 

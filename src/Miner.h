@@ -68,7 +68,7 @@ public:
 	void GetFileData(string FileName); // Gathers PE file data via "objdump -x" & "grep" command
 	void ParseFileSections(string); // Parse the start & end addresses of PE image sections
 	char * LoadPE(string); // Load the given named file
-	void StartMiner(char*); // Start tracing the file byte stream for NULL bytes
+	void StartMiner(char*,int); // Start tracing the file byte stream for NULL bytes
 	void EnumCaveLoc(Cave*); // Find out cave belongs witch section
 	void Result(); // Prints the result...
 };
@@ -116,7 +116,7 @@ void Miner::Result(){
 }
 
 
-void Miner::StartMiner(char * Cursor){
+void Miner::StartMiner(char * Cursor, int MinCaveSize){
 	int CurrentOfset = 0;
 	int NullCount = 0;
 
@@ -129,7 +129,7 @@ void Miner::StartMiner(char * Cursor){
 			NullCount++;
 		}
 		else{
-			if(NullCount > 300){
+			if(NullCount > MinCaveSize){
 				Cave * NewCave = new Cave;
 				CaveCount++;
 				cout << RESET << BOLDGREEN << "[+] New cave detected !\n";
