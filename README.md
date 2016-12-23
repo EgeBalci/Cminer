@@ -3,6 +3,8 @@
 
 ![](http://i.imgur.com/8QmoFrt.png)
 
+Cminer is a tool for enumerating code caves in PE files.
+
 <table>
     <tr>
         <th>Operative system</th>
@@ -34,7 +36,5 @@
     </tr>
 </table>
 
-Cminer is a tool for enumerating code caves in PE files.
-
-
-Usage: ./Cminer  <file> [MinSize]
+# Usage
+    ./Cminer  <file> [MinSize]
