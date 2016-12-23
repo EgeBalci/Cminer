@@ -3,8 +3,38 @@
 
 ![](http://i.imgur.com/8QmoFrt.png)
 
+<table>
+    <tr>
+        <th>Operative system</th>
+        <th> Version </th>
+    </tr>
+    <tr>
+        <td>Ubuntu</td>
+        <td>* </td>
+    </tr>
+    <tr>
+        <td>Kali linux</td>
+        <td>* </td>
+    </tr>
+    <tr>
+        <td>Debian</td>
+        <td>* </td>
+    </tr>
+    <tr>
+        <td>Mint</td>
+        <td>* </td>
+    </tr>
+     <tr>
+        <td>Arch Linux</td>
+        <td>* </td>
+    </tr>
+    <tr>
+        <td>Black Arch</td>
+        <td>* </td>
+    </tr>
+</table>
 
 Cminer is a tool for enumerating code caves in PE files.
 
 
-Usage: ./Cminer  <file>
+Usage: ./Cminer  <file> [MinSize]
