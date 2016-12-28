@@ -8,14 +8,10 @@ void PrintHelp(int);
 
 int main(int argc, char const *argv[]) // Compile Command: g++ -std=c++11 Cminer.cpp -o Cminer
 {
-	if(argc == 1){
+	if(argc != 2 && argc != 3){
 		PrintHelp(1);
 		return 0;	
 	}
-	else {
-		PrintHelp(0);
-	}
-
 	int MinCaveSize = 300;
 	string MinCaveSizeStr = string(argv[2],sizeof(argv[1]));
 	MinCaveSize = stoi(MinCaveSizeStr); // Convert the minimum cave size to integer
@@ -23,7 +19,13 @@ int main(int argc, char const *argv[]) // Compile Command: g++ -std=c++11 Cminer
 		cout << RESET << BOLDRED << "[-] ERROR : " << RED << "Minimum cave size is too small !" << endl;
 		return 0;
 	}
-	cout << RESET << BOLDYELLOW << "[*] Minimum cave size set to " << argv[2] << endl;
+	if(argc == 3){
+		cout << RESET << BOLDYELLOW << "[*] Minimum cave size set to " << argv[2] << endl;	
+	}
+	else{
+		cout << RESET << BOLDYELLOW << "[*] Minimum cave size set to 300" << endl;
+	}
+	
 
 	Miner tom; // Our humble miner tom ;)
 
@@ -65,7 +67,7 @@ void PrintHelp(int mode){
 					   " | |____| | | | | | | | | |  __/ |   \n"
 					   "  \\_____|_| |_| |_|_|_| |_|\\___|_|   \n\n" << RESET;
 
-	cout << BOLDBLUE << "Github: github.com/EgeBalci/Cminer\n" << RESET;
+	cout << BOLDBLUE << "https://github.com/EgeBalci/Cminer\n" << RESET;
 	if(mode == 1) {
 		cout << BOLDGREEN << "\nUsage: \n\tCminer <file> <MinCaveSize>\n\n" << RESET;
 		cout << GREEN << "Cminer is a tool for enumerating code caves inside PE files.\n" << RESET;
