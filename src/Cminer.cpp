@@ -6,7 +6,7 @@ using namespace std;
 
 void PrintHelp(int);
 
-int main(int argc, char const *argv[])
+int main(int argc, char const *argv[]) // Compile Command: g++ -std=c++11 Cminer.cpp -o Cminer
 {
 	if(argc == 1){
 		PrintHelp(1);
@@ -23,7 +23,7 @@ int main(int argc, char const *argv[])
 		cout << RESET << BOLDRED << "[-] ERROR : " << RED << "Minimum cave size is too small !" << endl;
 		return 0;
 	}
-	cout << RESET << BOLDYELLOW << "[*] Minimum cave size set to " << argv[1] << endl;
+	cout << RESET << BOLDYELLOW << "[*] Minimum cave size set to " << argv[2] << endl;
 
 	Miner tom; // Our humble miner tom ;)
 

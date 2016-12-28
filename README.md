@@ -37,4 +37,4 @@ Cminer is a tool for enumerating code caves in PE files.
 </table>
 
 # Usage
-    ./Cminer  <file> [MinCaveSize]
+    ./Cminer  <file> <MinCaveSize>
