@@ -8,22 +8,27 @@ void PrintHelp(int);
 
 int main(int argc, char const *argv[]) // Compile Command: g++ -std=c++11 Cminer.cpp -o Cminer
 {
+	int MinCaveSize;
+	string MinCaveSizeStr;
+
 	if(argc != 2 && argc != 3){
 		PrintHelp(1);
 		return 0;	
 	}
-	int MinCaveSize = 300;
-	string MinCaveSizeStr = string(argv[2],sizeof(argv[1]));
-	MinCaveSize = stoi(MinCaveSizeStr); // Convert the minimum cave size to integer
-	if(MinCaveSize < 0 || MinCaveSize < 100) {
-		cout << RESET << BOLDRED << "[-] ERROR : " << RED << "Minimum cave size is too small !" << endl;
-		return 0;
-	}
 	if(argc == 3){
+		PrintHelp(0);
+		MinCaveSizeStr = string(argv[2]);
+		MinCaveSize = stoi(MinCaveSizeStr); // Convert the minimum cave size to integer
 		cout << RESET << BOLDYELLOW << "[*] Minimum cave size set to " << argv[2] << endl;	
 	}
 	else{
+		PrintHelp(0);
+		MinCaveSize = 300;
 		cout << RESET << BOLDYELLOW << "[*] Minimum cave size set to 300" << endl;
+	}
+	if(MinCaveSize < 0 || MinCaveSize < 100) {
+		cout << RESET << BOLDRED << "[-] ERROR : " << RED << "minimumm cave size is too small !" << endl;
+		return 0;
 	}
 	
 
