@@ -38,3 +38,12 @@ Cminer is a tool for enumerating code caves in PE files.
 
 # Usage
     ./Cminer  <file> <MinCaveSize>
+    
+    
+    
+    
+![](http://i.imgur.com/8L1wmjo.png)
+
+   ![](https://blockchain.info/qr?data=14n1bJmCRNpLKAJVJ55jStH5VueFk6G1n4&size=200)
+
+Bitcoin: 14n1bJmCRNpLKAJVJ55jStH5VueFk6G1n4&size
