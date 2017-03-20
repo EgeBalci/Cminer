@@ -256,14 +256,14 @@ void Miner::GetFileData(string FileName){
 	DataFile.open("file.dat");
 	if(DataFile.is_open()) {
 		getline(DataFile, Line);
-		for(int i = 11; i < 25; i++){
+		for(int i = 11; i < (sizeof(Line)-1); i++){
 			pe.ImageBase += Line[i]; 
 		}
 		
 		cout << BOLDYELLOW << "[*] Image Base: " << BOLDBLUE << pe.ImageBase << endl;
 		
 		getline(DataFile, Line);
-		for(int i = 14; i < 25; i++){
+		for(int i = 14; i < (sizeof(Line)-1); i++){
 			pe.StartAddr += Line[i]; 
 		}
 
@@ -279,9 +279,9 @@ void Miner::ParseFileSections(string FileName){
 	cout << RESET << BOLDYELLOW << "[*] Parsing file sections...\n";
 	string _Sections = "objdump -h ";
 	_Sections += FileName;
-	_Sections += " | grep '2**2' > sec.dat";
+	_Sections += " | grep '*' > sec.dat";
 
-	system(&_Sections[0]); // objdump -h | grep '2**2' > sec.dat
+	system(&_Sections[0]); // objdump -h | grep '*' > sec.dat
 
 	fstream SectionData;
 	string Line;
@@ -294,11 +294,7 @@ void Miner::ParseFileSections(string FileName){
 			string Start = "";
 			string Ofset = "";
 
-			for(int i = 4; i < 11; i++){
-				SecName += Line[i]; 
-			}	
 			Section * NewSection = new Section;
-			NewSection->Name = SecName;
 			if(pe.Sections == NULL){
 				pe.Sections = NewSection;
 			}
@@ -306,25 +302,34 @@ void Miner::ParseFileSections(string FileName){
 				NewSection->Next = pe.Sections;
 				pe.Sections = NewSection;
 			}
+
+
+			SecName = Line.substr(4,11);
 			
-			for(int i = 18; i < 26; i++){
-				SecSize += Line[i];
-			}
+			NewSection->Name = SecName;
+
+			Line = Line.substr(18,(sizeof(Line)-6));
+			
+			SecSize = Line.substr(0,Line.find("  "));
+
 			stringstream SS1;
 			SS1 << hex << SecSize;
 			SS1 >> NewSection->size;
 
-			for(int i = 28; i < 36; i++){
-				Start += Line[i];
-			}
+			Line = Line.substr((Line.find("  ")+2),sizeof(Line));
+
+			Start = Line.substr(0,Line.find("  "));
+
 			stringstream SS2;
 			SS2 << hex << Start;
 			SS2 >> NewSection->StartAddr;
 			NewSection->EndAddr = (NewSection->StartAddr + NewSection->size);
 
-			for(int i = 48; i < 56; i++){
-				Ofset += Line[i];
-			}
+			Line = Line.substr((Line.find("  ")+2),sizeof(Line)-1);
+			Line = Line.substr((Line.find("  ")+2),sizeof(Line)-1);
+
+			Ofset = Line;
+
 			stringstream SS3;
 			SS3 << hex << Ofset;
 			SS3 >> NewSection->FileOfset;
