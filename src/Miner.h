@@ -289,6 +289,9 @@ void Miner::ParseFileSections(string FileName){
 	SectionData.open("sec.dat");
 	if(SectionData.is_open()){
 		while(getline(SectionData, Line)){
+
+			string _Line = Line;
+
 			string SecName = "";
 			string SecSize = "";
 			string Start = "";
@@ -325,17 +328,15 @@ void Miner::ParseFileSections(string FileName){
 			SS2 >> NewSection->StartAddr;
 			NewSection->EndAddr = (NewSection->StartAddr + NewSection->size);
 
-			Line = Line.substr((Line.find("  ")+2),sizeof(Line)-1);
-			Line = Line.substr((Line.find("  ")+2),sizeof(Line)-1);
 
-			Ofset = Line;
+			Ofset = _Line.substr((_Line.length()-14),(_Line.length()-6));
 
 			stringstream SS3;
 			SS3 << hex << Ofset;
 			SS3 >> NewSection->FileOfset;
 						
 			pe.SectionNum++; 
-			//cout << SecName << " hex size :" << SecSize <<  " raw: " << NewSection->size << " hex start:" << Start << " raw : " << NewSection->StartAddr << endl;
+			cout << NewSection->Name << " Size: " << NewSection->size << " Start: " << NewSection->StartAddr << " End: " << NewSection->EndAddr << " File Ofset: " << NewSection->FileOfset <<  " Ofset Line:" << Ofset << ":" << endl;
 		}
 	}
 	Section * temp = pe.Sections;
