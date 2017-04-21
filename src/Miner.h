@@ -336,7 +336,7 @@ void Miner::ParseFileSections(string FileName){
 			SS3 >> NewSection->FileOfset;
 						
 			pe.SectionNum++; 
-			cout << NewSection->Name << " Size: " << NewSection->size << " Start: " << NewSection->StartAddr << " End: " << NewSection->EndAddr << " File Ofset: " << NewSection->FileOfset <<  " Ofset Line:" << Ofset << ":" << endl;
+			//cout << NewSection->Name << " Size: " << NewSection->size << " Start: " << NewSection->StartAddr << " End: " << NewSection->EndAddr << " File Ofset: " << NewSection->FileOfset <<  " Ofset Line:" << Ofset << ":" << endl;
 		}
 	}
 	Section * temp = pe.Sections;
