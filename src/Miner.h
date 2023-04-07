@@ -31,7 +31,7 @@ using namespace std;
 
 struct Section { // Section data structure with linked list...
 	string Name; // Sections name
-	int FileOfset; // File ofset of the section
+	int FileOffset; // File offset of the section
 	int StartAddr; // Start address of the section 
 	int EndAddr;// End address of the section 
 	int size; // Size of the section
@@ -40,10 +40,10 @@ struct Section { // Section data structure with linked list...
 
 
 struct Cave { // Cave data structure with linked list...
-	int StartAddr = 0; // Start address of the code cave (file ofset)
-	int EndAddr = 0; // End address of the code cave (file ofset)
+	int StartAddr = 0; // Start address of the code cave (file offset)
+	int EndAddr = 0; // End address of the code cave (file offset)
 	int CaveSize = 0; // Size of the code cave
-	int FileOfset = 0; // File ofset of the cave
+	int FileOffset = 0; // File offset of the cave
 	string Section = ""; // The section whitch contains this code cave
 	Cave * Next = NULL; // Next code cave data link
 };
@@ -102,11 +102,11 @@ void Miner::Result(){
 		SS2 >> HexEndAddr;
 		cout << BOLDBLUE << "0x" << HexEndAddr << endl;
 
-		cout << BOLDYELLOW << "[*] File Ofset: ";
-		string FileOfset;
-		SS3 << hex << temp->FileOfset;
-		SS3 >> FileOfset;
-		cout << BOLDBLUE << "0x" << FileOfset << endl;
+		cout << BOLDYELLOW << "[*] File Offset: ";
+		string FileOffset;
+		SS3 << hex << temp->FileOffset;
+		SS3 >> FileOffset;
+		cout << BOLDBLUE << "0x" << FileOffset << endl;
 		i++;
 		temp = temp->Next; 
 	}
@@ -117,7 +117,7 @@ void Miner::Result(){
 
 
 void Miner::StartMiner(char * Cursor, int MinCaveSize){
-	int CurrentOfset = 0;
+	int CurrentOffset = 0;
 	int NullCount = 0;
 
 	cout << RESET << BOLDYELLOW << "[*] Starting cave mining process...\n";
@@ -125,7 +125,7 @@ void Miner::StartMiner(char * Cursor, int MinCaveSize){
 	for(int i = 0; i < pe.FileSize; i++){
 
 		
-		if(Cursor[i] == (char)0x00){ // Current ofset = i
+		if(Cursor[i] == (char)0x00){ // Current offset = i
 			NullCount++;
 		}
 		else{
@@ -188,10 +188,10 @@ char * Miner::LoadPE(string FileName){
 void Miner::EnumCaveLoc(Cave * _Cave){
 	Section * Sec = pe.Sections;
 	for(int i = 0; i < pe.SectionNum; i++) {
-		if((Sec->FileOfset < _Cave->StartAddr) && (_Cave->StartAddr < (Sec->FileOfset + Sec->size))) {
+		if((Sec->FileOffset < _Cave->StartAddr) && (_Cave->StartAddr < (Sec->FileOffset + Sec->size))) {
 			_Cave->Section = Sec->Name;
-			_Cave->FileOfset = _Cave->StartAddr;
-			_Cave->StartAddr = (Sec->StartAddr + (_Cave->StartAddr - Sec->FileOfset)); // Calculating the VMA(Virtual Memory Address) of the code cave
+			_Cave->FileOffset = _Cave->StartAddr;
+			_Cave->StartAddr = (Sec->StartAddr + (_Cave->StartAddr - Sec->FileOffset)); // Calculating the VMA(Virtual Memory Address) of the code cave
 			_Cave->EndAddr = (_Cave->StartAddr + _Cave->CaveSize);
 			break;
 		}
@@ -295,7 +295,7 @@ void Miner::ParseFileSections(string FileName){
 			string SecName = "";
 			string SecSize = "";
 			string Start = "";
-			string Ofset = "";
+			string Offset = "";
 
 			Section * NewSection = new Section;
 			if(pe.Sections == NULL){
@@ -329,14 +329,14 @@ void Miner::ParseFileSections(string FileName){
 			NewSection->EndAddr = (NewSection->StartAddr + NewSection->size);
 
 
-			Ofset = _Line.substr((_Line.length()-14),(_Line.length()-6));
+			Offset = _Line.substr((_Line.length()-14),(_Line.length()-6));
 
 			stringstream SS3;
-			SS3 << hex << Ofset;
-			SS3 >> NewSection->FileOfset;
+			SS3 << hex << Offset;
+			SS3 >> NewSection->FileOffset;
 						
 			pe.SectionNum++; 
-			//cout << NewSection->Name << " Size: " << NewSection->size << " Start: " << NewSection->StartAddr << " End: " << NewSection->EndAddr << " File Ofset: " << NewSection->FileOfset <<  " Ofset Line:" << Ofset << ":" << endl;
+			//cout << NewSection->Name << " Size: " << NewSection->size << " Start: " << NewSection->StartAddr << " End: " << NewSection->EndAddr << " File Offset: " << NewSection->FileOffset <<  " Offset Line:" << Offset << ":" << endl;
 		}
 	}
 	Section * temp = pe.Sections;
